@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-08 19:10:27"
+	"lastUpdated": "2025-03-16 06:39:21"
 }
 
 /*
@@ -37,9 +37,23 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/post/')) {
+	const suffixes = [
+		'/post/',
+		'/question/',
+		'/thread/',
+		'/project/',
+		'/intro/',
+		'/battle/',
+		'/link/',
+		'/guide/',
+		'/idea/',
+		'/event/'
+	];
+
+	if (suffixes.some(suffix => url.includes(suffix))) {
 		return 'blogPost';
 	}
+
 	return false;
 }
 
@@ -160,6 +174,38 @@ var testCases = [
 				"blogTitle": "Вастрик.Клуб",
 				"language": "ru",
 				"url": "https://vas3k.club/post/27655/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://vas3k.club/thread/26472/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Тред: Ваш домашний кофейный сетап",
+				"creators": [
+					{
+						"firstName": "Vova",
+						"lastName": "Lukashov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-11-25",
+				"abstractNote": "Привет :) Кажется, кофейный хайп немного поутих. Фанаты кофе уже не выглядят как маргиналы, которые с пеной у рта критикуют окружающих за нелюбовь к …",
+				"blogTitle": "Вастрик.Клуб",
+				"language": "ru",
+				"shortTitle": "Тред",
+				"url": "https://vas3k.club/thread/26472/",
 				"attachments": [
 					{
 						"title": "Snapshot",
