@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-08 18:56:49"
+	"lastUpdated": "2025-03-16 07:14:33"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/articles\/.+/)) {
+	if (url.match(/\/(articles|news)\/.+/)) {
 		return 'blogPost';
 	}
 
@@ -178,6 +178,48 @@ var testCases = [
 					},
 					{
 						"tag": "neurips"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://habr.com/ru/news/840520/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Команда Rust для Linux терпит поражение в сражении с разработчиками на С, её лидер ушёл из-за «нетехнической ерунды»",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "denis-19",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-09-03",
+				"abstractNote": "В начале сентября 2024 года команда разработчиков проекта по внедрению Rust для ядра Linux потерпела поражение в сражении с разработчиками на С. Лидер Rust для Linux объявил, что уходит из проекта...",
+				"blogTitle": "Хабр",
+				"language": "ru",
+				"url": "https://habr.com/ru/news/840520/",
+				"websiteType": "Хабр",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Rust для Linux"
+					},
+					{
+						"tag": "linux"
+					},
+					{
+						"tag": "rust"
 					}
 				],
 				"notes": [],
