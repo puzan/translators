@@ -2,37 +2,37 @@
 	"translatorID": "02bde528-c86d-42d5-904b-e74f85bd45f9",
 	"label": "Litres",
 	"creator": "Ilya Zonov",
-	"target": "^https://(www.)?litres.ru",
+	"target": "^https://(www\\.)?litres\\.ru/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-09 11:57:30"
+	"lastUpdated": "2025-03-29 17:26:32"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2025 Ilya Zonov
+	Copyright © 2025 Ilya Zonov
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -55,8 +55,6 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		item.itemType = detectWeb(doc, url) || "webpage";
-
 		item.publicationTitle = "";
 
 		item.title = text(doc, 'h1[itemprop="name"]');
@@ -81,7 +79,9 @@ async function scrape(doc, url = doc.location.href) {
 		item.complete();
 	});
 
-	translator.translate();
+	const em = await translator.getTranslatorObject();
+	em.itemType = 'book';
+	em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
