@@ -2,14 +2,14 @@
 	"translatorID": "b4c54248-6e78-4afc-b566-45fee8cd43b7",
 	"label": "Habr",
 	"creator": "Ilya Zonov",
-	"target": "https://habr.com",
+	"target": "^https://habr\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-16 07:14:33"
+	"lastUpdated": "2025-03-29 18:23:31"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/(articles|news)\/.+/)) {
+	if (/\/(articles|news)\/.+/.test(url)) {
 		return 'blogPost';
 	}
 
@@ -56,7 +56,6 @@ async function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		item.itemType = detectWeb(doc, url) || "webpage";
 		item.websiteType = "Хабр";
 
 		// cleanup publicationTitle to switch off rewriting blogTitle
@@ -73,13 +72,15 @@ async function scrape(doc, url) {
 		const date = attr(doc, 'meta[property="aiturec:datetime"]', 'content');
 		item.date = ZU.strToISO(date);
 
-		const author = text(doc, 'div.tm-article-presenter__header span.tm-article-snippet__author a.tm-user-info__username');
+		const author = text(doc, '.tm-article-presenter__header a.tm-user-info__username');
 		item.creators.push(ZU.cleanAuthor(author, "author"));
 
 		item.complete();
 	});
 
-	translator.translate();
+	const em = await translator.getTranslatorObject();
+	em.itemType = 'blogPost';
+	em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
@@ -154,7 +155,7 @@ var testCases = [
 					}
 				],
 				"date": "2025-03-07",
-				"abstractNote": "Привет! Меня зовут Настя Беззубцева, и я руковожу аналитикой голоса в&nbsp;Алисе. Недавно побывала на&nbsp;одной из&nbsp;крупнейших международных конференций по&nbsp;машинному обучению&nbsp;— NeurIPS...",
+				"abstractNote": "Привет! Меня зовут Настя Беззубцева, и я руковожу аналитикой голоса в Алисе. Недавно побывала на одной из крупнейших международных конференций по машинному обучению — NeurIPS...",
 				"blogTitle": "Хабр - Яндекс",
 				"language": "ru",
 				"shortTitle": "NeurIPS",
