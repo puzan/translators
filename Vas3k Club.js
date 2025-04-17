@@ -2,14 +2,14 @@
 	"translatorID": "71285b71-1714-4b9a-a47f-6c52a2d1c273",
 	"label": "Vas3k Club",
 	"creator": "Ilya Zonov",
-	"target": "^https://vas3k.club",
+	"target": "^https://vas3k\\.club/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-16 06:39:21"
+	"lastUpdated": "2025-03-29 18:31:04"
 }
 
 /*
@@ -95,12 +95,10 @@ async function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		item.itemType = detectWeb(doc, url) || "webpage";
-		
 		const date = text(doc, 'header div.post-actions-line span');
 		item.date = parseDate(date);
 
-		const authors = doc.querySelectorAll('header > div.post-author > a > span.user-name');
+		const authors = doc.querySelectorAll('header .post-author .user-name');
 		for (const author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 		}
@@ -108,7 +106,9 @@ async function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.translate();
+	const em = await translator.getTranslatorObject();
+	em.itemType = 'blogPost';
+	em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
