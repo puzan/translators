@@ -2,14 +2,14 @@
 	"translatorID": "6b4bf64d-2894-48ac-a7cb-d1da7fae7271",
 	"label": "Yandex Books",
 	"creator": "Ilya Zonov",
-	"target": "^https://books.yandex.ru",
+	"target": "^https://books\\.yandex\\.ru/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-08 20:23:05"
+	"lastUpdated": "2025-03-29 17:52:25"
 }
 
 /*
@@ -55,8 +55,6 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		item.itemType = detectWeb(doc, url) || "webpage";
-
 		const title = text(doc, 'span[data-e2e="content.title.main"]');
 		item.title = title;
 
@@ -67,16 +65,15 @@ async function scrape(doc, url = doc.location.href) {
 
 		const detailsBlock = doc.querySelector('div[data-e2e="content.details"]');
 
-		const abstract = text(detailsBlock, 'div > div > span > span');
+		const abstract = text(detailsBlock, 'div[data-e2e^="content.expandable"] > div > div > span > span');
 		item.abstractNote = abstract;
 
 		const publisher = text(detailsBlock, 'div[data-e2e="content.info.publisher"] a[data-e2e="content.author.name"]');
 		item.publisher = publisher;
 
-		const yearSpans = detailsBlock.querySelectorAll('div[data-e2e="content.info.publication.year"] span');
-		const lastYearSpan = yearSpans[yearSpans.length - 1];
-		if (lastYearSpan) {
-			item.date = lastYearSpan.textContent;
+		const yearSpan = detailsBlock.querySelectorAll('div[data-e2e="content.info.publication.year"] span:last-child')[0];
+		if (yearSpan) {
+			item.date = yearSpan.textContent;
 		}
 
 		const series = text(detailsBlock, 'div[data-e2e="content.info.series"] a');
@@ -85,7 +82,9 @@ async function scrape(doc, url = doc.location.href) {
 		item.complete();
 	});
 
-	translator.translate();
+	const em = await translator.getTranslatorObject();
+	em.itemType = 'book';
+	em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
@@ -165,7 +164,13 @@ var testCases = [
 			{
 				"itemType": "book",
 				"title": "Release it! Проектирование и дизайн ПО для тех, кому не все равно",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Майкл",
+						"lastName": "Нейгард",
+						"creatorType": "author"
+					}
+				],
 				"date": "2017",
 				"abstractNote": "Не важно, каким инструментом вы пользуетесь для программной разработки — Java,. NET или Ruby on Rails. Написание кода — это еще только полдела. Готовы ли вы к внезапному наплыву ботов на ваш сайт? Предусмотрена ли в вашем ПО «защита от дурака»? Правильно ли вы понимаете юзабилити? Майкл Нейгард утверждает, что большинство проблем в программных продуктах были заложены в них еще на стадии дизайна и проектирования. Вы можете двигаться к идеалу сами — методом проб и ошибок, а можете использовать опыт автора. В этой книге вы найдете множество шаблонов проектирования, помогающих избежать критических ситуаций и не меньшее количество антишаблонов, иллюстрирующих неправильные подходы с подробным анализом возможных последствий. Любой разработчик, имеющий опыт многопоточного программирования, легко разберется в примерах на Java, которые подробно поясняются и комментируются.Стабильность, безопасность и дружественный интерфейс — вот три важнейших слагаемых успеха вашего программного продукта. Если в ваши планы не входит в течение последующих лет отвечать на недовольные письма пользователей, выслушивать критику заказчиков и постоянно латать дыры, устраняя возникающие баги, то прежде чем выпустить финальный релиз, прочтите эту книгу.",
 				"language": "ru",
