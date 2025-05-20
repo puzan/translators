@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-17 18:46:00"
+	"lastUpdated": "2025-05-06 18:15:23"
 }
 
 /*
@@ -37,42 +37,69 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/books\/.+/)) {
+	if (/\/books\/.+/.test(url) && doc.querySelector('span[data-test-id="CONTENT_TITLE_MAIN"]')) {
 		return 'book';
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('div[data-test-id="SEARCH_ALL_TAB"] a[href*="/books/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 async function doWeb(doc, url) {
-	await scrape(doc, url);
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
 }
 
 async function scrape(doc, url = doc.location.href) {
-	const translator = Zotero.loadTranslator('web');
+	let translator = Zotero.loadTranslator('web');
 
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		const title = text(doc, 'span[data-test-id="CONTENT_TITLE_MAIN"]');
+		let title = text(doc, 'span[data-test-id="CONTENT_TITLE_MAIN"]');
 		item.title = title;
 
-		const authors = doc.querySelectorAll('div[data-test-id="CONTENT_TITLE_AUTHOR"] a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
-		for (const author of authors) {
+		let authors = doc.querySelectorAll('div[data-test-id="CONTENT_TITLE_AUTHOR"] a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
+		for (let author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 		}
 
-		const detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
+		let detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
 
-		const abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] > div > div > span > span');
+		let abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] :only-child');
 		item.abstractNote = abstract;
 
-		const contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
+		let contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
 
-		contentInfoItems.forEach((it) => {
-			const label = it.querySelector('span').textContent.trim();
-			const valueElement = it.querySelector('span + span');
+		for (let contentItem of contentInfoItems) {
+			let [labelElement, valueElement] = contentItem.children;
+			let label = labelElement.textContent;
 
 			if (label.includes('Год выхода издания')) {
 				item.date = valueElement.textContent.trim();
@@ -83,12 +110,12 @@ async function scrape(doc, url = doc.location.href) {
 			else if (label.includes('Серия')) {
 				item.series = text(valueElement, 'a');
 			}
-		});
+		}
 
 		item.complete();
 	});
 
-	const em = await translator.getTranslatorObject();
+	let em = await translator.getTranslatorObject();
 	em.itemType = 'book';
 	em.doWeb(doc, url);
 }
@@ -178,7 +205,7 @@ var testCases = [
 					}
 				],
 				"date": "2017",
-				"abstractNote": "Не важно, каким инструментом вы пользуетесь для программной разработки — Java,. NET или Ruby on Rails. Написание кода — это еще только полдела. Готовы ли вы к внезапному наплыву ботов на ваш сайт? Предусмотрена ли в вашем ПО «защита от дурака»? Правильно ли вы понимаете юзабилити? Майкл Нейгард утверждает, что большинство проблем в программных продуктах были заложены в них еще на стадии дизайна и проектирования. Вы можете двигаться к идеалу сами — методом проб и ошибок, а можете использовать опыт автора. В этой книге вы найдете множество шаблонов проектирования, помогающих избежать критических ситуаций и не меньшее количество антишаблонов, иллюстрирующих неправильные подходы с подробным анализом возможных последствий. Любой разработчик, имеющий опыт многопоточного программирования, легко разберется в примерах на Java, которые подробно поясняются и комментируются.Стабильность, безопасность и дружественный интерфейс — вот три важнейших слагаемых успеха вашего программного продукта. Если в ваши планы не входит в течение последующих лет отвечать на недовольные письма пользователей, выслушивать критику заказчиков и постоянно латать дыры, устраняя возникающие баги, то прежде чем выпустить финальный релиз, прочтите эту книгу.",
+				"abstractNote": "Не важно, каким инструментом вы пользуетесь для программной разработки — Java, .NET или Ruby on Rails. Написание кода — это еще только полдела. Готовы ли вы к внезапному наплыву ботов на ваш сайт? Предусмотрена ли в вашем ПО «защита от дурака»? Правильно ли вы понимаете юзабилити? Майкл Нейгард утверждает, что большинство проблем в программных продуктах были заложены в них еще на стадии дизайна и проектирования. Вы можете двигаться к идеалу сами — методом проб и ошибок, а можете использовать опыт автора. В этой книге вы найдете множество шаблонов проектирования, помогающих избежать критических ситуаций и не меньшее количество антишаблонов, иллюстрирующих неправильные подходы с подробным анализом возможных последствий. Любой разработчик, имеющий опыт многопоточного программирования, легко разберется в примерах на Java, которые подробно поясняются и комментируются. Стабильность, безопасность и дружественный интерфейс — вот три важнейших слагаемых успеха вашего программного продукта. Если в ваши планы не входит в течение последующих лет отвечать на недовольные письма пользователей, выслушивать критику заказчиков и постоянно латать дыры, устраняя возникающие баги, то прежде чем выпустить финальный релиз, прочтите эту книгу.",
 				"language": "ru",
 				"libraryCatalog": "books.yandex.ru",
 				"publisher": "Питер",
@@ -227,6 +254,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://books.yandex.ru/search/all/%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
